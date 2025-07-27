@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CryptoStaking } from '@/components/CryptoStaking';
 import { DeadspotMining } from '@/components/DeadspotMining';
+import { LiveTransactions } from '@/components/LiveTransactions';
 
 const Index = () => {
   return (
@@ -23,6 +24,9 @@ const Index = () => {
             </p>
           </div>
         </div>
+
+        {/* Historique Live des Transactions */}
+        <LiveTransactions />
 
         <Tabs defaultValue="staking" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8 neon-border">
