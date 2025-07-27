@@ -102,6 +102,7 @@ export const DeadspotMining = () => {
       
       const coinsGained = 0.00001 * totalClickPower * prestigeMultiplier;
       const expGained = 0.10 * (1 + prev.experienceMultiplier) * prestigeMultiplier;
+      const miningGained = 0.000001 * totalClickPower * prestigeMultiplier; // Chaque click augmente le mining h/s
       
       const newExp = prev.experience + expGained;
       const newLevel = Math.floor(newExp / (100 * prev.level)) + prev.level;
@@ -114,7 +115,8 @@ export const DeadspotMining = () => {
         level: newLevel,
         energy: Math.max(0, prev.energy - 1),
         maxEnergy: prev.maxEnergy + (levelUps * (30 + prev.level)),
-        clickPower: prev.clickPower + (levelUps * 4 * prestigeMultiplier)
+        clickPower: prev.clickPower + (levelUps * 4 * prestigeMultiplier),
+        miningRate: prev.miningRate + miningGained // Augmente le taux de mining automatique
       };
     });
   }, [gameState.energy, toast]);
