@@ -69,6 +69,8 @@ export const CryptoStaking = () => {
   const [transactionId, setTransactionId] = useState<string>('');
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
+  const [withdrawCrypto, setWithdrawCrypto] = useState<string>('');
+  const [withdrawWallet, setWithdrawWallet] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -145,6 +147,16 @@ export const CryptoStaking = () => {
 
   const handleWithdraw = () => {
     const withdrawValue = parseFloat(withdrawAmount);
+    
+    if (!withdrawCrypto || !withdrawWallet || !withdrawAmount) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs de retrait",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (withdrawValue > totalBalance) {
       toast({
         title: "Erreur",
@@ -154,12 +166,21 @@ export const CryptoStaking = () => {
       return;
     }
 
-    // Simuler le retrait
+    // Générer un délai aléatoire entre 10h et 48h
+    const minHours = 10;
+    const maxHours = 48;
+    const randomHours = Math.floor(Math.random() * (maxHours - minHours + 1)) + minHours;
+    
+    // Simuler le retrait avec délai
     toast({
-      title: "Retrait demandé",
-      description: `Demande de retrait de ${withdrawValue} en cours de traitement`
+      title: "Retrait en cours",
+      description: `Retrait de ${withdrawValue} ${cryptoAddresses[withdrawCrypto].name} vers votre wallet. Délai estimé: ${randomHours}h. Vous recevrez une notification dès que le transfert sera terminé.`,
     });
+    
+    // Reset form
     setWithdrawAmount('');
+    setWithdrawCrypto('');
+    setWithdrawWallet('');
   };
 
   const getTotalEarnings = () => {
@@ -199,9 +220,17 @@ export const CryptoStaking = () => {
               </SelectContent>
             </Select>
             {selectedCrypto && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Adresse: {cryptoAddresses[selectedCrypto].address}
-              </p>
+              <div className="mt-2 p-3 bg-card/80 rounded-lg neon-border">
+                <p className="text-lg font-bold text-primary mb-1">
+                  🏦 ADRESSE DE DÉPÔT:
+                </p>
+                <p className="text-sm font-mono text-secondary break-all bg-muted p-2 rounded">
+                  {cryptoAddresses[selectedCrypto].address}
+                </p>
+                <p className="text-xs text-destructive mt-1 font-semibold">
+                  ⚠️ ATTENTION: Vérifiez bien l'adresse pour éviter la perte de vos cryptos!
+                </p>
+              </div>
             )}
           </div>
           
@@ -278,22 +307,69 @@ export const CryptoStaking = () => {
 
       {/* Retrait */}
       <Card className="crypto-card p-6 neon-border">
-        <h3 className="text-xl font-bold mb-4">💸 Retrait</h3>
-        <div className="flex gap-4">
-          <Input
-            type="number"
-            value={withdrawAmount}
-            onChange={(e) => setWithdrawAmount(e.target.value)}
-            placeholder="Montant à retirer"
-            className="neon-border"
-          />
-          <Button onClick={handleWithdraw} variant="outline" className="neon-glow">
-            Retirer
+        <h3 className="text-xl font-bold mb-4">💸 Retrait de Crypto</h3>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Crypto-monnaie à retirer</Label>
+              <Select value={withdrawCrypto} onValueChange={setWithdrawCrypto}>
+                <SelectTrigger className="neon-border">
+                  <SelectValue placeholder="Sélectionner crypto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(cryptoAddresses).map(([key, crypto]) => (
+                    <SelectItem key={key} value={key}>
+                      {crypto.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Montant à retirer</Label>
+              <Input
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="Montant"
+                className="neon-border"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label>Votre adresse wallet {withdrawCrypto && `(${cryptoAddresses[withdrawCrypto].name})`}</Label>
+            <Input
+              value={withdrawWallet}
+              onChange={(e) => setWithdrawWallet(e.target.value)}
+              placeholder="Entrez votre adresse de wallet de destination"
+              className="neon-border font-mono"
+            />
+            {withdrawCrypto && (
+              <div className="mt-2 p-3 bg-card/80 rounded-lg neon-border">
+                <p className="text-sm font-bold text-primary mb-1">
+                  📋 Mode {cryptoAddresses[withdrawCrypto].name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Assurez-vous que l'adresse correspond au réseau {cryptoAddresses[withdrawCrypto].name}
+                </p>
+                <p className="text-xs text-destructive mt-1 font-semibold">
+                  ⚠️ Délai de traitement: 10-48h après validation
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <Button onClick={handleWithdraw} className="w-full neon-glow">
+            Demander le retrait
           </Button>
+          
+          <p className="text-sm text-muted-foreground text-center">
+            💰 Solde disponible: {totalBalance.toFixed(6)}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground mt-2">
-          Solde disponible: {totalBalance.toFixed(6)}
-        </p>
       </Card>
     </div>
   );
